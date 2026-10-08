@@ -1,0 +1,49 @@
+---
+// The download card, drawn as a textured PEI spring-steel sheet.
+import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
+import { links } from "../site";
+---
+
+<section class="cta" id="download">
+  <div class="container">
+    <div class="plate">
+      <span class="notch left" aria-hidden="true"></span>
+      <span class="notch right" aria-hidden="true"></span>
+      <div class="plate-body">
+        <div class="plate-copy">
+          <div class="plate-top">
+            <Logo size="md" on="plate" />
+            <a href={links.repo} class="plate-link">
+              <Icon name="github" />
+              View on GitHub
+            </a>
+          </div>
+          <h2>Free for one printer or a hundred</h2>
+          <p>
+            Open Print Stack is open source under the AGPL. Browse the code, report an issue, or
+            write a driver for your printer.
+          </p>
+        </div>
+        <div class="plate-actions">
+          <a class="btn btn-ink" href={links.releases}>
+            <Icon name="download" />
+            Download for macOS
+          </a>
+          <a class="btn btn-ink-outline" href={links.releases}>
+            <Icon name="download" />
+            Download for Windows
+          </a>
+          <a class="btn btn-ink-outline" href={links.installation}>
+            <Icon name="code" />
+            Build from source
+          </a>
+        </div>
+      </div>
+      <div class="plate-ruler" aria-hidden="true"></div>
+      <span class="plate-mark" aria-hidden="true">
+        TEXTURED PEI · 256 × 256 mm
+      </span>
+    </div>
+  </div>
+</section>

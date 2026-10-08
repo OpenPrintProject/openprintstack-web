@@ -1,0 +1,65 @@
+---
+import Icon from "./Icon.astro";
+import { featureGroups } from "../data/features";
+---
+
+<section class="section" id="features">
+  <div class="container feat-grid">
+    <div class="feat-intro">
+      <p class="eyebrow">
+        <span class="layer-tag">L03</span>Monitor, control, self-host
+      </p>
+      <h2>Every printer, every print, on your terms</h2>
+      <p class="sub">
+        Whether one printer is mid-print in the garage or twenty are lined up in a print farm, see
+        what each one is doing and act on it from any browser on your network.
+      </p>
+      <div class="feat-progress" id="featProgress" aria-hidden="true">
+        {featureGroups.map((_, i) => (
+          <i class:list={{ on: i === 0 }} />
+        ))}
+      </div>
+    </div>
+
+    <div class="feat-groups">
+      {featureGroups.map((group, g) => (
+        <section class="fgroup card" data-group={g}>
+          <h3 class="fg-title">{group.title}</h3>
+          {group.items.map((f) => (
+            <div class="fitem">
+              <span class="fi-icon">
+                <Icon name={f.icon} />
+              </span>
+              <div>
+                <h4>
+                  {f.title}
+                  {f.badge && <span class="badge">{f.badge}</span>}
+                </h4>
+                <p>{f.text}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  // The pills under the heading follow whichever group is mid-screen.
+  const pills = [...document.querySelectorAll("#featProgress i")];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const idx = Number((entry.target as HTMLElement).dataset.group);
+        pills.forEach((p, i) => {
+          p.classList.toggle("on", i === idx);
+          p.classList.toggle("done", i < idx);
+        });
+      }
+    },
+    { rootMargin: "-45% 0px -45% 0px" },
+  );
+  document.querySelectorAll(".fgroup").forEach((g) => observer.observe(g));
+</script>

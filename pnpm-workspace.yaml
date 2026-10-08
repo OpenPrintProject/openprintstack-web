@@ -1,0 +1,6 @@
+# Dependencies whose install scripts may run. pnpm refuses to install while any
+# dependency's script is neither allowed nor denied.
+allowBuilds:
+  # Astro's esbuild. Its script only checks the platform binary, which the
+  # platform package already provides.
+  esbuild: false

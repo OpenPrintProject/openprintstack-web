@@ -1,0 +1,30 @@
+---
+// GitHub Pages serves this for any address that doesn't exist.
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import { links, site, url } from "../site";
+---
+
+<Base title={`Page not found · ${site.name}`} noindex>
+  <section class="hero notfound">
+    <div class="plate-grid" aria-hidden="true">
+      <span class="ruler ruler-x"></span>
+    </div>
+    <div class="container hero-copy">
+      <p class="eyebrow">
+        <span class="layer-tag">404</span>Nothing on the plate
+      </p>
+      <h1>This page didn't print</h1>
+      <p class="lede">The link may be out of date, or the page may have moved.</p>
+      <div class="cta-row">
+        <a href={url()} class="btn btn-accent btn-lg">
+          <Icon name="arrow-r" />
+          Go to the homepage
+        </a>
+        <a href={links.docs} class="btn btn-ghost btn-lg">
+          Read the docs
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

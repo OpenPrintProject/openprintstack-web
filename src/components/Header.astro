@@ -1,0 +1,53 @@
+---
+import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
+import { links, site, url } from "../site";
+---
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a class="brand" href={url()} aria-label={`${site.name} home`}>
+      <Logo />
+      <span class="brand-text">
+        <strong>{site.name}</strong>
+        <small>{site.tagline}</small>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href={url("#printers")} class="nav-link">
+        Printers
+      </a>
+      <a href={url("#features")} class="nav-link">
+        Features
+      </a>
+      <a href={links.docs} class="nav-link">
+        Docs
+      </a>
+      <a href={links.repo} class="icon-link" aria-label={`${site.name} on GitHub`}>
+        <Icon name="github" />
+      </a>
+      <a href={url("#download")} class="btn btn-accent btn-sm">
+        <Icon name="download" />
+        <span>Download</span>
+      </a>
+    </nav>
+  </div>
+  <div class="header-progress" aria-hidden="true">
+    <span id="printProgress"></span>
+  </div>
+</header>
+
+<script>
+  // The header floats once you scroll, and its bottom edge fills like a print
+  // progress bar.
+  const header = document.getElementById("siteHeader")!;
+  const progress = document.getElementById("printProgress")!;
+  const onScroll = () => {
+    const y = window.scrollY;
+    header.classList.toggle("floating", y > 24);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = `${max > 0 ? Math.min(100, (y / max) * 100) : 0}%`;
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+</script>

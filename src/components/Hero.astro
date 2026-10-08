@@ -1,0 +1,53 @@
+---
+import Icon from "./Icon.astro";
+import ProductShot from "./ProductShot.astro";
+import { links, url } from "../site";
+---
+
+<section class="hero">
+  <div class="plate-grid" aria-hidden="true">
+    <span class="origin">
+      <i></i>X0.00 Y0.00 Z0.20
+    </span>
+    <span class="ruler ruler-x"></span>
+  </div>
+
+  <div class="container hero-copy">
+    <a class="announce" href={url("#printers")}>
+      <span class="announce-tag">v0.1 alpha</span>
+      <span>Now with Elegoo Centauri Carbon 2 support</span>
+      <Icon name="arrow-r" />
+    </a>
+    <h1 class="hero-title">
+      3D print management
+      <br />
+      <span class="printed-wrap">
+        <span class="printed">that's yours</span>
+        <span class="nozzle-line" aria-hidden="true">
+          <i></i>
+        </span>
+      </span>
+    </h1>
+    <p class="lede">
+      Monitor and control every printer from one dashboard that runs on your own hardware. No cloud,
+      no subscription, whether you run one printer or a hundred.
+    </p>
+    <div class="cta-row">
+      <a href={url("#download")} class="btn btn-accent btn-lg">
+        <Icon name="download" />
+        Download for macOS
+      </a>
+      <a href={links.repo} class="btn btn-ghost btn-lg">
+        <Icon name="github" />
+        View on GitHub
+      </a>
+    </div>
+    <p class="fineprint">
+      Free &amp; open source <span>·</span> macOS and Windows <span>·</span> No cloud account
+    </p>
+  </div>
+
+  <div class="container-wide">
+    <ProductShot />
+  </div>
+</section>

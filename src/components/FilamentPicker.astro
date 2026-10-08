@@ -1,0 +1,59 @@
+---
+/**
+ * A design-review control for trying the accent in other filament colours.
+ * The layout only renders it in `pnpm dev`, so it never reaches the live site.
+ */
+import Icon from "./Icon.astro";
+
+const filaments = [
+  { id: "gold", name: "Silk Gold" },
+  { id: "orange", name: "PLA Orange" },
+  { id: "lime", name: "PLA Lime" },
+  { id: "cyan", name: "PETG Cyan" },
+];
+---
+
+<div class="filament-picker" role="group" aria-label="Accent colour (design preview)">
+  <span class="fp-label">
+    <Icon name="spool" />
+    <span>Filament</span>
+  </span>
+  {filaments.map((f, i) => (
+    <button
+      type="button"
+      data-filament={f.id}
+      title={f.name}
+      aria-label={f.name}
+      aria-pressed={i === 0 ? "true" : "false"}
+    >
+      <i />
+    </button>
+  ))}
+</div>
+
+<script>
+  const picker = document.querySelector<HTMLElement>(".filament-picker")!;
+  const buttons = [...picker.querySelectorAll<HTMLButtonElement>("button[data-filament]")];
+
+  const setFilament = (name: string) => {
+    document.documentElement.dataset.filament = name;
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.filament === name)));
+    try {
+      localStorage.setItem("ops-filament", name);
+    } catch {
+      // Storage can be unavailable; the choice just won't be remembered.
+    }
+  };
+
+  picker.addEventListener("click", (e) => {
+    const b = (e.target as Element).closest<HTMLButtonElement>("button[data-filament]");
+    if (b?.dataset.filament) setFilament(b.dataset.filament);
+  });
+
+  try {
+    const saved = localStorage.getItem("ops-filament");
+    if (saved && buttons.some((b) => b.dataset.filament === saved)) setFilament(saved);
+  } catch {
+    // Storage can be unavailable; keep the default.
+  }
+</script>

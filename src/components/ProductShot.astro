@@ -1,0 +1,180 @@
+---
+/**
+ * The web app in a browser window, drawn at a fixed 1240 × 800 and scaled to
+ * fit. The example fleet comes from src/lib/fleet.ts.
+ */
+import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
+import { cardHTML, fleet, fleetCounts } from "../lib/fleet";
+
+const chips = [
+  { filter: "all", label: "All" },
+  { filter: "printing", label: "Printing" },
+  { filter: "idle", label: "Idle" },
+  { filter: "paused", label: "Needs attention" },
+  { filter: "offline", label: "Offline" },
+] as const;
+
+const nav = [
+  { label: "Fleet" },
+  { icon: "printer", label: "Printers", count: fleet.length, active: true },
+  { icon: "layers", label: "Print queue", count: 4 },
+  { icon: "folder", label: "Files" },
+  { label: "Activity" },
+  { icon: "activity", label: "Events" },
+  { icon: "camera", label: "Cameras" },
+  { label: "System" },
+  { icon: "radar", label: "Find printers" },
+  { icon: "sliders", label: "Settings" },
+];
+---
+
+<div class="shot" id="shot">
+  <div class="shot-stage">
+    <div class="browser">
+      <div class="browser-bar">
+        <span class="lights">
+          <i></i>
+          <i></i>
+          <i></i>
+        </span>
+        <span class="bnav">
+          <Icon name="arrow-r" />
+          <Icon name="arrow-r" />
+        </span>
+        <span class="url">
+          <Icon name="monitor" />
+          workshop-mac.local:7337/printers
+        </span>
+        <span class="bnav right">
+          <Icon name="upload" />
+          <Icon name="plus" />
+        </span>
+      </div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand">
+            <Logo size="sm" />
+            <span>Open Print Stack</span>
+          </div>
+          {nav.map((item) =>
+            item.icon ? (
+              <span class:list={["side-item", { active: item.active }]}>
+                <Icon name={item.icon} />
+                {item.label}
+                {item.count && <span class="count">{item.count}</span>}
+              </span>
+            ) : (
+              <p class="side-label">{item.label}</p>
+            ),
+          )}
+          <div class="side-foot">
+            <span class="dot ok"></span>
+            <div>
+              <strong>Server online</strong>
+              <small>This Mac · port 7337</small>
+            </div>
+          </div>
+        </aside>
+        <div class="app-main">
+          <div class="app-head">
+            <div>
+              <h3>Printers</h3>
+              <p>
+                {fleetCounts.all} printers · {fleetCounts.printing} printing · {fleetCounts.paused}{" "}
+                needs attention
+              </p>
+            </div>
+            <div class="app-actions">
+              <span class="ui-btn">
+                <Icon name="radar" />
+                Find printers
+              </span>
+              <span class="ui-btn primary">
+                <Icon name="plus" />
+                Add printer
+              </span>
+            </div>
+          </div>
+          <div class="chips" id="fleetChips" role="group" aria-label="Filter printers">
+            {chips.map((c, i) => (
+              <button
+                type="button"
+                class:list={["chip", { active: i === 0 }]}
+                data-filter={c.filter}
+                aria-pressed={i === 0 ? "true" : "false"}
+              >
+                {c.label} <b>{fleetCounts[c.filter]}</b>
+              </button>
+            ))}
+          </div>
+          <div class="pgrid" id="printerGrid" set:html={fleet.map(cardHTML).join("")} />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { fleet, jobLines, objectFor, tempHTML } from "../lib/fleet";
+
+  // Scale the fixed-size stage to the width it has.
+  const shot = document.getElementById("shot")!;
+  const fit = () => shot.style.setProperty("--s", String(shot.clientWidth / 1240));
+  new ResizeObserver(fit).observe(shot);
+  fit();
+
+  const grid = document.getElementById("printerGrid")!;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>("#fleetChips .chip")];
+
+  chips.forEach((chip) =>
+    chip.addEventListener("click", () => {
+      chips.forEach((c) => {
+        c.classList.toggle("active", c === chip);
+        c.setAttribute("aria-pressed", String(c === chip));
+      });
+      const f = chip.dataset.filter;
+      grid.querySelectorAll<HTMLElement>(".pcard").forEach((card) => {
+        card.classList.toggle("hidden", f !== "all" && card.dataset.status !== f);
+      });
+    }),
+  );
+
+  // Advance the prints, and let the temperatures wobble a little.
+  function tick() {
+    for (const pr of fleet) {
+      if (pr.status === "offline" || pr.status === "idle" || !pr.nozzle || !pr.bed) continue;
+      const card = grid.querySelector<HTMLElement>(`[data-id="${pr.id}"]`);
+      if (!card) continue;
+      const set = (key: string, html: string) => {
+        const el = card.querySelector<HTMLElement>(`[data-k="${key}"]`);
+        if (el) el.innerHTML = html;
+      };
+
+      if (pr.status === "printing") {
+        pr.progress = (pr.progress ?? 0) + 0.0025 + Math.random() * 0.002;
+        if (pr.progress >= 0.995) pr.progress = 0.04;
+        const j = jobLines(pr);
+        set("pct", `${j.pct}%`);
+        set("layer", `Layer ${j.layer} / ${j.layers}`);
+        set("eta", j.right);
+        card.querySelector<HTMLElement>('[data-k="bar"]')!.style.width = `${j.pct}%`;
+        const obj = objectFor(pr);
+        set("obj", obj.svg);
+        card
+          .querySelector('[data-k="headwrap"]')
+          ?.setAttribute("transform", `translate(0 ${obj.tip})`);
+      }
+
+      const wobble = (target: number) => target + Math.round((Math.random() - 0.5) * 2);
+      if (pr.nozzle[1]) set("nozzle", tempHTML([wobble(pr.nozzle[1]), pr.nozzle[1]]));
+      else if (pr.status === "paused") {
+        pr.nozzle[0] = Math.max(60, pr.nozzle[0] - 1);
+        set("nozzle", tempHTML(pr.nozzle));
+      }
+      if (pr.bed[1]) set("bed", tempHTML([wobble(pr.bed[1]), pr.bed[1]]));
+    }
+  }
+
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(tick, 1600);
+</script>

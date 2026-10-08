@@ -1,0 +1,25 @@
+---
+import Icon from "./Icon.astro";
+import { links, site, url } from "../site";
+---
+
+<footer class="site-footer">
+  <div class="container foot">
+    <p>
+      © {new Date().getFullYear()} <strong>{site.name}</strong>
+      <span class="sep">|</span>
+      {site.tagline}
+    </p>
+    <nav aria-label="Footer">
+      <a href={url("#download")}>Download</a>
+      <a href={links.docs}>Docs</a>
+      <a href={url("#printers")}>Drivers</a>
+      <a href={links.releases}>Changelog</a>
+      <a href={links.security}>Security</a>
+      <a href={links.licence}>AGPL-3.0</a>
+      <a href={links.repo} class="icon-link" aria-label="GitHub">
+        <Icon name="github" />
+      </a>
+    </nav>
+  </div>
+</footer>

@@ -1,0 +1,71 @@
+---
+import Icon from "./Icon.astro";
+import { CAPABILITIES, drivers, type Cap } from "../data/drivers";
+
+const pip: Record<Cap, { cls: string; label: string }> = {
+  yes: { cls: "pip on", label: "Yes" },
+  partly: { cls: "pip part", label: "Partly" },
+  no: { cls: "pip", label: "Not yet" },
+};
+---
+
+<section class="section band" id="printers">
+  <div class="container">
+    <div class="section-head center">
+      <p class="eyebrow">
+        <span class="layer-tag">L02</span>Printer support
+      </p>
+      <h2>Works with the printers you already own</h2>
+      <p class="sub">
+        One driver per brand, all behind the same interface. Supported drivers are tested on real
+        hardware; experimental ones are built from published docs and get better with your feedback.
+      </p>
+    </div>
+
+    <div class="drivers card">
+      <div class="drivers-cap">
+        <span>Capabilities by driver</span>
+        <span class="legend">
+          <i class="pip on"></i>Yes <i class="pip part"></i>Partly <i class="pip"></i>Not yet
+        </span>
+      </div>
+      <div class="drow drow-head" aria-hidden="true">
+        <span></span>
+        <span class="caps-labels">
+          {CAPABILITIES.map((c) => (
+            <span>{c}</span>
+          ))}
+        </span>
+        <span></span>
+      </div>
+
+      {drivers.map((d) => (
+        <div class="drow">
+          <div class="dname">
+            <span class="dicon">
+              <Icon name={d.icon} />
+            </span>
+            <div>
+              <strong>{d.name}</strong>
+              <small>{d.detail}</small>
+            </div>
+          </div>
+          <div class="caps">
+            {d.caps.map((c, i) => (
+              <span class="cap">
+                <i class={pip[c].cls} title={`${CAPABILITIES[i]}: ${pip[c].label}`} />
+                <em>{CAPABILITIES[i]}</em>
+                <span class="sr-only">{pip[c].label}</span>
+              </span>
+            ))}
+          </div>
+          <div class="dstat">
+            <strong class:list={["big", { accent: d.supported }]}>{d.status}</strong>
+            <b>{d.basis}</b>
+            <small>{d.note}</small>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

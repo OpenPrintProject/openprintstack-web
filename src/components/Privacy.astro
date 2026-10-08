@@ -1,0 +1,79 @@
+---
+import Icon from "./Icon.astro";
+import { links } from "../site";
+
+const points = [
+  "Runs entirely on your hardware, with no external services",
+  "Connects to printers in LAN-only mode, where the brand offers one",
+  "Open source, so you can check exactly what it does",
+];
+
+const flows = [
+  { icon: "file", label: "Print files", to: "→ your printers" },
+  { icon: "camera", label: "Camera snapshots", to: "→ this computer" },
+  { icon: "activity", label: "Events and telemetry", to: "→ this computer" },
+  { icon: "cloud-off", label: "Vendor cloud", to: "not used", muted: true },
+];
+---
+
+<section class="section">
+  <div class="container split">
+    <div class="split-copy">
+      <p class="eyebrow">
+        <span class="layer-tag">L05</span>Private by design
+      </p>
+      <h2>Your prints never leave your network</h2>
+      <p class="sub">
+        Open Print Stack talks to your printers directly over your local network. There's no account
+        to make with us, no vendor cloud in the middle, and nothing to opt out of.
+      </p>
+      <ul class="checklist">
+        {points.map((p) => (
+          <li>
+            <Icon name="check-circle" />
+            {p}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="stack-card">
+      <div class="stack-ghost" aria-hidden="true"></div>
+      <div class="card dataflow">
+        <header class="df-head">
+          <span class="sq-icon">
+            <Icon name="shield" />
+          </span>
+          <div>
+            <strong>Where your data goes</strong>
+            <small>Workshop Mac · 192.168.1.20</small>
+          </div>
+          <span class="tag">
+            <Icon name="lock" />
+            Local only
+          </span>
+        </header>
+        <ul class="df-rows">
+          {flows.map((f) => (
+            <li>
+              <span class:list={["df-ic", { muted: f.muted }]}>
+                <Icon name={f.icon} />
+              </span>
+              {f.label}
+              <span class="mono">{f.to}</span>
+            </li>
+          ))}
+        </ul>
+        <footer class="df-foot">
+          <div>
+            <small>Sent outside your network</small>
+            <strong class="mono">0 bytes</strong>
+          </div>
+          <a class="btn btn-accent" href={links.repo}>
+            <Icon name="code" />
+            Read the source
+          </a>
+        </footer>
+      </div>
+    </div>
+  </div>
+</section>

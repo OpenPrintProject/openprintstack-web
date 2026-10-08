@@ -1,0 +1,123 @@
+---
+import Icon from "./Icon.astro";
+import { START_COUNT, lineHTML, seededLines } from "../lib/events";
+import { links } from "../site";
+
+const filters = [
+  { cat: "all", label: "All" },
+  { cat: "state", label: "Status" },
+  { cat: "job", label: "Jobs" },
+  { cat: "command", label: "Commands" },
+  { cat: "alert", label: "Alerts" },
+];
+---
+
+<section class="section band">
+  <div class="container split wide">
+    <div class="split-copy">
+      <p class="eyebrow">
+        <span class="layer-tag">L04</span>Event log
+      </p>
+      <h2>Every event, on the record</h2>
+      <p class="sub">
+        Status changes, commands, uploads and faults are written down the moment they happen. Watch
+        them live, or filter back through everything a printer has done.
+      </p>
+      <p class="strong-line">Stored on your computer. Nobody else reads it.</p>
+      <a class="text-link" href={links.data}>
+        How your data is stored <Icon name="arrow-ur" />
+      </a>
+    </div>
+    <div class="log card">
+      <header class="log-head">
+        <span class="sq-icon">
+          <Icon name="terminal" />
+        </span>
+        <div>
+          <strong>Event log</strong>
+          <small>All printers · newest first</small>
+        </div>
+        <span class="live">
+          <i></i>Live
+        </span>
+      </header>
+      <div class="log-filters" id="logFilters" role="group" aria-label="Filter events">
+        {filters.map((f, i) => (
+          <button
+            type="button"
+            class:list={["chip", { active: i === 0 }]}
+            data-cat={f.cat}
+            aria-pressed={i === 0 ? "true" : "false"}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+      <ol
+        class="log-lines"
+        id="logLines"
+        set:html={seededLines()
+          .map((e) => lineHTML(e))
+          .join("")}
+      />
+      <footer class="log-foot">
+        <span>Telemetry kept 7 days · everything else kept</span>
+        <span class="mono" id="eventCount">
+          {START_COUNT.toLocaleString("en-GB")} events
+        </span>
+      </footer>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { SEEDED, START_COUNT, eventAt, lineHTML, type LogEvent } from "../lib/events";
+
+  const list = document.getElementById("logLines")!;
+  const count = document.getElementById("eventCount")!;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>("#logFilters .chip")];
+
+  let next = SEEDED;
+  let filter = "all";
+  let fresh: LogEvent | null = null;
+  const events: LogEvent[] = Array.from({ length: SEEDED }, (_, i) => eventAt(SEEDED - 1 - i));
+
+  const render = () => {
+    list.innerHTML = events
+      .filter((e) => filter === "all" || e.cat === filter)
+      .slice(0, 14)
+      .map((e) => lineHTML(e, e === fresh))
+      .join("");
+    count.textContent = `${(START_COUNT + next - SEEDED).toLocaleString("en-GB")} events`;
+  };
+
+  chips.forEach((chip) =>
+    chip.addEventListener("click", () => {
+      chips.forEach((c) => {
+        c.classList.toggle("active", c === chip);
+        c.setAttribute("aria-pressed", String(c === chip));
+      });
+      filter = chip.dataset.cat ?? "all";
+      fresh = null;
+      render();
+    }),
+  );
+
+  const push = () => {
+    fresh = eventAt(next++);
+    events.unshift(fresh);
+    events.length = Math.min(events.length, 40);
+    render();
+  };
+
+  // Only stream while the log is on screen.
+  let timer: ReturnType<typeof setInterval> | undefined;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  new IntersectionObserver(([entry]) => {
+    if (entry?.isIntersecting && !reduceMotion && !timer) timer = setInterval(push, 2400);
+    else if (!entry?.isIntersecting && timer) {
+      clearInterval(timer);
+      timer = undefined;
+    }
+  }).observe(list);
+</script>
